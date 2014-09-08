@@ -1495,11 +1495,23 @@ class LdapAuthenticationPlugin extends AuthPlugin {
 		}
 		$this->printDebug( "Retrieving preferences", NONSENSITIVE );
 		foreach ( array_keys( $prefs ) as $key ) {
-			$attr = strtolower( $prefs[$key] );
-			if ( !isset( $this->userInfo[0][$attr] ) ) {
-				continue;
+			if (is_array($prefs[$key])) {
+				$values = array();
+				foreach ($prefs[$key] as $akey) {
+					$attr = strtolower($akey);
+					if ( !isset( $this->userInfo[0][$attr] ) ) {
+						continue;
+					}
+					$values[] = $this->userInfo[0][$attr][0];
+				}
+				$value = implode(' ', $values);
+			} else {
+				$attr = strtolower( $prefs[$key] );
+				if ( !isset( $this->userInfo[0][$attr] ) ) {
+					continue;
+				}
+				$value = $this->userInfo[0][$attr][0];
 			}
-			$value = $this->userInfo[0][$attr][0];
 			switch ( $key ) {
 				case "email":
 					$this->email = $value;
@@ -1515,7 +1527,11 @@ class LdapAuthenticationPlugin extends AuthPlugin {
 					break;
 				case "realname":
 					$this->realname = $value;
-					$this->printDebug( "Retrieved realname ($this->realname) using attribute ($prefs[$key])", NONSENSITIVE );
+					if (is_array($prefs[$key])) {
+						$this->printDebug( "Retrieved realname ($this->realname) using attributes (" . implode(', ', $prefs[$key]) . ")", NONSENSITIVE );
+					} else {
+						$this->printDebug( "Retrieved realname ($this->realname) using attribute ($prefs[$key])", NONSENSITIVE );
+					}
 					break;
 			}
 		}
