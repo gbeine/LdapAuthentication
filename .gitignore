@@ -2,3 +2,8 @@
 *~
 *.kate-swp
 .*.swp
+
+# Eclipse
+.settings
+.buildpath
+.project
